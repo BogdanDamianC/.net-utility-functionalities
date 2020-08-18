@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Utilities.Graph.Undirected
 {
@@ -18,6 +20,29 @@ namespace Utilities.Graph.Undirected
             (start, end) = GetSampleGraph(false);
             Test(start, end);
             Test(end, start);
+            TestFromStream();
+        }
+
+        public static void TestFromStream()
+        {
+            var sr = new StreamReader(GetSampleStream());
+            string edgeInfo;
+            var t = new Dictionary<string, GStr>();
+            Func<string, GStr> getNode = (string key) =>
+            {
+                if(!t.TryGetValue(key, out var node))
+                {
+                    node = new GStr(key);
+                    t.Add(key, node);
+                }
+                return node;
+            };
+            while((edgeInfo = sr.ReadLine()) != null)
+            {
+                var ei = edgeInfo.Split(' ');
+                getNode(ei[0]).AddEdge(getNode(ei[1]));
+            }
+            Test(getNode("A"), getNode("H"));
         }
 
         private static void Test(GStr start, GStr end)
@@ -134,6 +159,28 @@ namespace Utilities.Graph.Undirected
                 }                
             }
             return (start, endNode);
+        }
+
+
+        private static Stream GetSampleStream()
+        {
+            var ms = new MemoryStream();
+            var xx = new StreamWriter(ms);
+            xx.WriteLine("A B");
+            xx.WriteLine("B C");
+            xx.WriteLine("C D");
+            xx.WriteLine("D H");
+
+            xx.WriteLine("A E");
+            xx.WriteLine("E F");
+            xx.WriteLine("F G");
+            xx.WriteLine("G H");
+
+            xx.WriteLine("B G");
+            xx.WriteLine("E D");
+            xx.Flush();
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms;
         }
     }
 }
